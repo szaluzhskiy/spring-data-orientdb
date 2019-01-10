@@ -13,15 +13,19 @@
 package org.springframework.boot.orient.sample.shiro;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.orient.commons.repository.config.EnableOrientRepositories;
 import org.springframework.data.orient.object.OrientObjectDatabaseFactory;
+import org.springframework.data.orient.object.OrientObjectTemplate;
 import org.springframework.data.orient.object.repository.support.OrientObjectRepositoryFactoryBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 
 @Configuration
+@EnableAutoConfiguration
 @EnableOrientRepositories(basePackages = "org.springframework.boot.orient.sample.shiro.repository", repositoryFactoryBeanClass = OrientObjectRepositoryFactoryBean.class)
 public class OrientDbConfiguration {
 
@@ -32,5 +36,10 @@ public class OrientDbConfiguration {
     @Transactional
     public void registerEntities() {
         factory.db().getEntityManager().registerEntityClasses("org.springframework.boot.orient.sample.shiro.model");
+    }
+
+    @Bean
+    public OrientObjectTemplate objectTemplate() {
+        return new OrientObjectTemplate(factory);
     }
 }

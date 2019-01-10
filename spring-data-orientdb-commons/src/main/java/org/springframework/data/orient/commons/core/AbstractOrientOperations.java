@@ -1,13 +1,14 @@
 package org.springframework.data.orient.commons.core;
 
-import com.orientechnologies.common.exception.OException;
 import com.orientechnologies.orient.core.cache.OLocalRecordCache;
 import com.orientechnologies.orient.core.command.OCommandOutputListener;
 import com.orientechnologies.orient.core.command.OCommandRequest;
 import com.orientechnologies.orient.core.db.ODatabase;
 import com.orientechnologies.orient.core.db.ODatabaseListener;
+import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.db.record.OIdentifiable;
 import com.orientechnologies.orient.core.dictionary.ODictionary;
+import com.orientechnologies.orient.core.exception.ODatabaseException;
 import com.orientechnologies.orient.core.exception.OTransactionException;
 import com.orientechnologies.orient.core.hook.ORecordHook;
 import com.orientechnologies.orient.core.id.ORID;
@@ -18,6 +19,7 @@ import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.metadata.security.OSecurityUser;
 import com.orientechnologies.orient.core.metadata.security.OUser;
 import com.orientechnologies.orient.core.query.OQuery;
+import com.orientechnologies.orient.core.record.ORecord;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.core.sql.OCommandSQL;
 import com.orientechnologies.orient.core.sql.query.OSQLQuery;
@@ -26,7 +28,6 @@ import com.orientechnologies.orient.core.storage.ORecordCallback;
 import com.orientechnologies.orient.core.storage.ORecordMetadata;
 import com.orientechnologies.orient.core.storage.OStorage;
 import com.orientechnologies.orient.core.tx.OTransaction;
-import com.orientechnologies.orient.core.version.ORecordVersion;
 import org.springframework.data.orient.commons.repository.DetachMode;
 
 import java.io.IOException;
@@ -118,7 +119,7 @@ public abstract class AbstractOrientOperations<T> implements OrientOperations<T>
 
     @Override
     public ORecordHook.RESULT callbackHooks(ORecordHook.TYPE type, OIdentifiable id) {
-        return dbf.db().callbackHooks(type, id);
+        return ((ODatabaseDocumentTx) this.dbf.db()).callbackHooks(type, id);
     }
 
     @Override
@@ -337,7 +338,7 @@ public abstract class AbstractOrientOperations<T> implements OrientOperations<T>
     }
 
     @Override
-    public <S extends T> S save(S entity, ODatabase.OPERATION_MODE mode, boolean forceCreate, ORecordCallback<? extends Number> recordCallback, ORecordCallback<ORecordVersion> recordUpdatedCallback) {
+    public <S extends T> S save(S entity, ODatabase.OPERATION_MODE mode, boolean forceCreate, ORecordCallback<? extends Number> recordCallback, ORecordCallback<Integer> recordUpdatedCallback) {
         return dbf.db().save(entity, mode, forceCreate, recordCallback, recordUpdatedCallback);
     }
 
@@ -405,7 +406,7 @@ public abstract class AbstractOrientOperations<T> implements OrientOperations<T>
             }
         }
 
-        throw new OException("Cluster " + clusterName + " not found");
+        throw new ODatabaseException("Cluster " + clusterName + " not found");
     }
 
     @Override
@@ -465,17 +466,17 @@ public abstract class AbstractOrientOperations<T> implements OrientOperations<T>
 
     @Override
     public void freezeCluster(int iClusterId, boolean throwException) {
-        dbf.db().freezeCluster(iClusterId, throwException);
+        dbf.db().dropCluster(iClusterId, throwException);
     }
 
     @Override
     public void freezeCluster(int iClusterId) {
-        dbf.db().freezeCluster(iClusterId);
+        dbf.db().freeze();
     }
 
     @Override
     public void releaseCluster(int iClusterId) {
-        dbf.db().releaseCluster(iClusterId);
+        dbf.db().dropCluster(iClusterId, true);
     }
 
     @Override
@@ -489,8 +490,8 @@ public abstract class AbstractOrientOperations<T> implements OrientOperations<T>
     }
 
     @Override
-    public ODatabase<T> delete(ORID rid, ORecordVersion version) {
-        return dbf.db().delete(rid, version);
+    public ODatabase<T> delete(ORID rid, ORecord version) {
+        return dbf.db().delete(rid, version.getVersion());
     }
 
     @Override
@@ -525,7 +526,7 @@ public abstract class AbstractOrientOperations<T> implements OrientOperations<T>
 
     @Override
     public void setUser(OUser user) {
-        dbf.db().setUser(user);
+        //dbf.db().getUser(user);
     }
 
     @Override

@@ -18,6 +18,7 @@ import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authc.credential.DefaultPasswordService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.orient.sample.shiro.Application;
+import org.springframework.boot.orient.sample.shiro.ApplicationExceptionHandler;
 import org.springframework.boot.orient.sample.shiro.OrientDbConfiguration;
 import org.springframework.boot.orient.sample.shiro.ShiroConfiguration;
 import org.springframework.boot.orient.sample.shiro.model.Permission;
@@ -44,7 +45,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.testng.AssertJUnit.assertEquals;
 
 @SpringApplicationConfiguration(classes
-        = {Application.class, OrientDbConfiguration.class, ShiroConfiguration.class})
+        = {Application.class, OrientDbConfiguration.class, ShiroConfiguration.class, UserController.class,
+        ApplicationExceptionHandler.class})
 @WebAppConfiguration
 @IntegrationTest
 @TestExecutionListeners(inheritListeners = false, listeners
@@ -118,7 +120,6 @@ public class UserControllerTest extends AbstractTestNGSpringContextTests {
         headers.setContentType(MediaType.APPLICATION_JSON);
         final String json = new ObjectMapper().writeValueAsString(
                 new UsernamePasswordToken(USER_EMAIL, "wrong password"));
-        System.out.println(json);
         final ResponseEntity<String> response = new TestRestTemplate(
                 TestRestTemplate.HttpClientOption.ENABLE_COOKIES).exchange(BASE_URL.concat("/auth"),
                 HttpMethod.POST, new HttpEntity<>(json, headers), String.class);
