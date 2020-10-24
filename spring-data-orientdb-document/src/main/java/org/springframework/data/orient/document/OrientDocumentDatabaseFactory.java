@@ -1,9 +1,9 @@
 package org.springframework.data.orient.document;
 
+import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
 import com.orientechnologies.orient.core.db.OPartitionedDatabasePool;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.record.ORecord;
-import com.orientechnologies.orient.core.record.impl.ODocument;
 import org.springframework.data.orient.commons.core.AbstractOrientDatabaseFactory;
 
 /**
@@ -21,7 +21,7 @@ public class OrientDocumentDatabaseFactory extends AbstractOrientDatabaseFactory
 
     @Override
     protected void createPool() {
-        pool = new OPartitionedDatabasePool(getUrl(), getUsername(), getPassword(), maxPoolSize);
+        pool = new OPartitionedDatabasePool(getUrl(), getUsername(), getPassword());
     }
 
     /* (non-Javadoc)
@@ -29,6 +29,7 @@ public class OrientDocumentDatabaseFactory extends AbstractOrientDatabaseFactory
      */
     @Override
     public ODatabaseDocumentTx openDatabase() {
+        ODatabaseRecordThreadLocal.instance().get();
         db = pool.acquire();
         return db;
     }

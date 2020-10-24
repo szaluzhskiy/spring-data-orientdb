@@ -65,11 +65,11 @@ public abstract class AbstractOrientDatabaseFactory<T> implements OrientDatabase
 
     public ODatabase<T> db() {
         ODatabase<T> db;
-        if(!ODatabaseRecordThreadLocal.INSTANCE.isDefined()) {
+        if(!ODatabaseRecordThreadLocal.instance().isDefined()) {
             db = openDatabase();
             log.debug("acquire db from pool {}", db.hashCode());
         } else {
-            db = (ODatabase<T>)ODatabaseRecordThreadLocal.INSTANCE.get().getDatabaseOwner();
+            db = (ODatabase<T>)ODatabaseRecordThreadLocal.instance().get().getDatabaseOwner();
 
             if(db.isClosed()) {
                 db = openDatabase();
